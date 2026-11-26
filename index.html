@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Ride Bike Store – Smart Workshop Management System</title>
+  <style>
+    :root {
+      --bg-main: #07131a;
+      --bg-card: #0d202b;
+      --bg-input: #091720;
+      --border-color: #183646;
+      --teal: #14b8a6;
+      --teal-hover: #0d9488;
+      --teal-soft: rgba(20, 184, 166, 0.14);
+      --text-main: #f1f5f9;
+      --text-muted: #8fa8b5;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding-bottom: 85px;
+      min-height: 100vh;
+    }
+
+    /* Login Overlay Screen */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #0f2936 0%, #050e14 100%);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #loginScreen.hidden {
+      display: none;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 410px;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .login-logo {
+      display: inline-block;
+      background: linear-gradient(135deg, #0f2936, #134e4a);
+      border: 1.5px solid var(--teal);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .login-logo span {
+      color: var(--teal);
+    }
+
+    .login-card h2 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .login-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .pin-input {
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: 6px;
+      font-weight: 800;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #0f2936, #134e4a);
+      border: 1.5px solid var(--teal);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+      font-size: 15px;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(20, 184, 166, 0.15);
+    }
+
+    .logo-badge span {
+      color: var(--teal);
+    }
+
+    .title-group h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .user-pill {
+      background: var(--teal-soft);
+      border: 1px solid var(--teal);
+      color: var(--teal);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sync-pill {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .sys-version {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--teal);
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .sys-version small {
+      display: block;
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Forms */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-header span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    @media (max-width: 650px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--teal);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* Accessory Chips */
+    .chips-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .chip.selected {
+      background-color: var(--teal-soft);
+      border-color: var(--teal);
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    /* Selected Parts Pill List */
+    .parts-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .part-pill {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .part-pill button {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--teal);
+      color: #041311;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--teal-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--teal);
+    }
+
+    .btn-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Stats Dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-box .num {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--teal);
+      margin-bottom: 4px;
+    }
+
+    .stat-box .lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Orders & Parts List */
+    .item-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-open { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .badge-progress { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .badge-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+    .item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Owner Only Helper */
+    .owner-only {
+      display: none;
+    }
+
+    body.is-owner .owner-only {
+      display: block;
+    }
+
+    body.is-owner .owner-only-inline {
+      display: inline-flex;
+    }
+
+    .owner-only-inline {
+      display: none;
+    }
+
+    /* Bottom Navigation */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 4px;
+      z-index: 50;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .nav-btn.active {
+      color: var(--teal);
+      background-color: var(--teal-soft);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--teal);
+      color: #041311;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+
+    #toast.show {
+      opacity: 1;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 90;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 18px;
+    }
+
+    /* Print Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">I RIDE <span>BIKE STORE</span></div>
+      <h2>Smart Workshop Management System</h2>
+      <p>أدخل كود الدخول الخاص بك للوصول إلى نظام الورشة</p>
+
+      <div class="form-group" style="text-align: right;">
+        <label>اختر الحساب</label>
+        <select id="login-user-select"></select>
+      </div>
+
+      <div class="form-group" style="text-align: right;">
+        <label>كود الدخول / الباسورد (PIN)</label>
+        <input type="password" id="login-pin" class="pin-input" placeholder="••••" onkeydown="if(event.key==='Enter') handleLogin()" />
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">🔓 تسجيل الدخول</button>
+      <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted);">
+        نظام VPC-D1 — محمي بصلاحيات المالك والموظفين
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-area">
+      <div class="logo-badge">I RIDE <span>BIKE STORE</span></div>
+      <div class="title-group">
+        <h1>I Ride Bike Store – Smart Workshop Management System</h1>
+        <p>Smart Electric Scooter Maintenance & Workshop Management</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="sync-pill" id="sync-status-badge">💾 محلي فقط</div>
+      <div class="user-pill" id="active-user-badge">👤 غير مسجل</div>
+      <button class="btn btn-secondary btn-sm" onclick="pullCloudNow()" title="تحديث البيانات من السحابة">🔄 مزامنة</button>
+      <button class="btn btn-danger btn-sm" onclick="logoutUser()" title="قفل الشاشة وتسجيل الخروج">🔒 قفل</button>
+      <div class="sys-version">
+        <small>النظام</small>
+        VPC-D1
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. نظرة عامة (Dashboard) -->
+    <section id="sec-dashboard" class="section active">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="num" id="stat-total-orders">0</div>
+          <div class="lbl">إجمالي أوامر العمل</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-open-orders" style="color: var(--warning);">0</div>
+          <div class="lbl">قيد الصيانة / مفتوح</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-done-orders" style="color: var(--success);">0</div>
+          <div class="lbl">تم التسليم / جاهز</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="stat-parts-count">0</div>
+          <div class="lbl">أصناف قطع الغيار</div>
+        </div>
+        <div class="stat-box owner-only">
+          <div class="num" id="stat-total-revenue" style="color: #38bdf8;">0</div>
+          <div class="lbl">إجمالي قيمة الأوامر (ج.م)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>أحدث أوامر العمل بالورشة</h2>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('reception')">+ استلام جديد</button>
+        </div>
+        <div id="dashboard-recent-orders"></div>
+      </div>
+    </section>
+
+    <!-- 2. الاستقبال (Reception & Create Work Order) -->
+    <section id="sec-reception" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>بيانات العميل والسكوتر</h2>
+          <span>تسجيل استلام جديد</span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>اسم العميل *</label>
+            <input type="text" id="rec-customer" placeholder="مثال: أحمد محمود" />
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف *</label>
+            <input type="tel" id="rec-phone" placeholder="010xxxxxxxx" />
+          </div>
+          <div class="form-group">
+            <label>موديل السكوتر / النوع *</label>
+            <input type="text" id="rec-model" placeholder="مثال: Xiaomi Pro 2 / Dualtron / Kugoo" />
+          </div>
+          <div class="form-group">
+            <label>الرقم التسلسلي / كود الشاسيه (اختياري)</label>
+            <input type="text" id="rec-serial" placeholder="S/N أو رقم اللوحة" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>المهندس</label>
+          <input type="text" id="rec-tech" value="eng. mohamed" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>تفاصيل الاستلام وقطع الغيار</h2>
+          <span>الشكوى، الملحقات، طلبات العميل، والقطع المركبة</span>
+        </div>
+
+        <div class="form-group">
+          <label>الشكوى المبلّغ عنها *</label>
+          <textarea id="rec-complaint" placeholder="اكتب الأعطال والشكاوى بالتفصيل (مثال: مرايات، مقبض تزويد تالف، إشارة خلفي شمال تالفة...)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>الملحقات المستلمة مع السكوتر</label>
+          <div class="chips-grid" id="accessories-chips">
+            <div class="chip" data-val="الشاحن">الشاحن</div>
+            <div class="chip" data-val="المفاتيح">المفاتيح</div>
+            <div class="chip" data-val="مفتاح احتياطي">مفتاح احتياطي</div>
+            <div class="chip" data-val="الخوذة">الخوذة</div>
+            <div class="chip" data-val="حامل الهاتف">حامل الهاتف</div>
+            <div class="chip" data-val="السلة / الحمالة">السلة / الحمالة</div>
+            <div class="chip" data-val="أوراق التسجيل">أوراق التسجيل</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label>قطع أخدها العميل معه (لم تُترك في الورشة)</label>
+          <input type="text" id="rec-taken-parts" placeholder="مثال: الشاحن الأصلي، بطارية خارجية، السلة..." />
+        </div>
+
+        <div class="form-group">
+          <label>قطع الغيار المطلوبة / التي يريدها العميل</label>
+          <textarea id="rec-requested-parts" style="min-height: 65px;" placeholder="مثال: العميل يسأل عن طقم مرايات أصلي، مقبض تزويد، أو كاوتش خلفي..."></textarea>
+        </div>
+
+        <div class="form-group" style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px;">
+          <label style="color: var(--teal);">قطع الغيار التي ستُركّب في أمر العمل (تُخصم من المخزون تلقائياً)</label>
+          <div class="grid-3">
+            <div>
+              <label>اختر قطعة من المخزون</label>
+              <select id="rec-part-select"></select>
+            </div>
+            <div>
+              <label>الكمية</label>
+              <input type="number" id="rec-part-qty" value="1" min="1" />
+            </div>
+            <div>
+              <button type="button" class="btn btn-secondary" onclick="addPartToReception()">+ إضافة</button>
+            </div>
+          </div>
+          <div class="parts-tag-list" id="rec-selected-parts-list"></div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="form-group">
+            <label>الموعد الموعود للتسليم</label>
+            <input type="date" id="rec-date" />
+          </div>
+          <div class="form-group">
+            <label>المصنعية / تكلفة إضافية (ج.م)</label>
+            <input type="number" id="rec-labor-cost" placeholder="0.00" min="0" step="0.01" />
+          </div>
+        </div>
+
+        <div style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+          <span style="font-size: 13px; color: var(--text-muted);">إجمالي التكلفة التقديرية (قطع مركبة + مصنعية):</span>
+          <strong style="color: var(--teal); font-size: 16px;" id="rec-total-preview">0.00 ج.م</strong>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button class="btn btn-primary" style="flex: 2;" onclick="createWorkOrder()">✔ إنشاء أمر عمل وحفظ</button>
+          <button class="btn btn-secondary" style="flex: 1;" onclick="resetReceptionForm()">تفريغ الحقول</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. الأوامر (Work Orders Management) -->
+    <section id="sec-orders" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>سجل أوامر العمل</h2>
+          <span id="orders-count-badge">0 أمر</span>
+        </div>
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <input type="text" id="search-orders" placeholder="بحث برقم الأمر، اسم العميل، الهاتف، أو الموديل..." oninput="renderOrders()" />
+          <select id="filter-order-status" onchange="renderOrders()">
+            <option value="all">جميع الحالات</option>
+            <option value="open">مفتوح / قيد الفحص</option>
+            <option value="progress">جاري الإصلاح</option>
+            <option value="done">تم الإصلاح / جاهز للتسليم</option>
+          </select>
+        </div>
+        <div id="orders-list"></div>
+      </div>
+    </section>
+
+    <!-- 4. القطع (Spare Parts Inventory) -->
+    <section id="sec-parts" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>مخزون قطع الغيار</h2>
+          <button class="btn btn-primary btn-sm owner-only-inline" onclick="openPartModal()">+ إضافة قطعة</button>
+        </div>
+        <div class="form-group">
+          <input type="text" id="search-parts" placeholder="بحث باسم القطعة، كود SKU، التصنيف، أو الرف..." oninput="renderParts()" />
+        </div>
+        <div id="parts-list"></div>
+      </div>
+    </section>
+
+    <!-- 5. الإعدادات وإدارة الصلاحيات (Settings & Access Control) -->
+    <section id="sec-settings" class="section">
+
+      <!-- إدارة حسابات الموظفين والمالك (للمالك فقط) -->
+      <div class="card owner-only">
+        <div class="card-header">
+          <h2>إدارة الموظفين وأكواد الدخول (Access Control)</h2>
+          <span>صلاحيات المالك فقط</span>
+        </div>
+
+        <div style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; margin-bottom: 14px;">
+          <label style="color: var(--teal); margin-bottom: 8px;">إضافة موظف جديد بكود دخول خاص</label>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>اسم الموظف *</label>
+              <input type="text" id="new-staff-name" placeholder="مثال: كريم (استقبال)" />
+            </div>
+            <div class="form-group">
+              <label>كود الدخول / الباسورد (PIN) *</label>
+              <input type="text" id="new-staff-pin" placeholder="مثال: 1234" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>مستوى الصلاحية</label>
+            <select id="new-staff-role">
+              <option value="staff">موظف استقبال / ورشة (استلام وأوامر عمل بدون أسعار التكلفة أو الحذف)</option>
+              <option value="owner">مدير / شريك (صلاحيات كاملة)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addUserAccount()">+ إضافة حساب موظف</button>
+        </div>
+
+        <div id="users-list"></div>
+      </div>
+
+      <!-- سجل نشاط الموظفين (Audit Log - للمالك فقط) -->
+      <div class="card owner-only">
+        <div class="card-header">
+          <h2>سجل مراقبة نشاط المستخدمين (Audit Log)</h2>
+          <button class="btn btn-danger btn-sm" onclick="clearAuditLogs()">مسح السجل</button>
+        </div>
+        <div id="audit-log-list" style="max-height: 240px; overflow-y: auto;"></div>
+      </div>
+
+      <!-- النسخ الاحتياطي (للمالك فقط) -->
+      <div class="card owner-only">
+        <div class="card-header">
+          <h2>النسخ الاحتياطي واستعادة البيانات</h2>
+          <span>حفظ محلي + ملف JSON</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px;">
+          يتم حفظ جميع أوامر العمل وقطع الغيار وحسابات الموظفين محلياً وعلى قاعدة البيانات السحابية. يُنصح بتصدير نسخة احتياطية أسبوعياً.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <button class="btn btn-primary" onclick="exportBackup()">⬇ تصدير نسخة احتياطية (JSON)</button>
+          <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
+            ⬆ استيراد نسخة احتياطية (JSON)
+            <input type="file" accept=".json" style="display: none;" onchange="importBackup(event)" />
+          </label>
+        </div>
+      </div>
+
+      <!-- بيانات الفرع -->
+      <div class="card">
+        <div class="card-header">
+          <h2>بيانات الفرع والتقارير</h2>
+          <span>I Ride Bike Store</span>
+        </div>
+        <div class="form-group">
+          <label>اسم الفرع والعنوان (يظهر في إيصالات الاستلام المطبوعة)</label>
+          <input type="text" id="set-branch" value="I Ride Bike Store – فرع أكتوبر (المحور المركزي، 6 أكتوبر)" />
+        </div>
+        <div class="form-group">
+          <label>رقم خدمة عملاء الورشة</label>
+          <input type="text" id="set-phone" placeholder="رقم هاتف الورشة للطباعة على الإيصال" />
+        </div>
+        <button class="btn btn-primary btn-sm owner-only-inline" onclick="saveSettings()">حفظ بيانات الفرع</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Modal: إضافة / تعديل قطعة غيار -->
+  <div class="modal-backdrop" id="partModal">
+    <div class="modal-box">
+      <div class="card-header">
+        <h2 id="partModalTitle">إضافة قطعة للمخزون</h2>
+        <button class="btn btn-secondary btn-sm" onclick="closePartModal()">✕</button>
+      </div>
+      <input type="hidden" id="part-id" />
+      <div class="form-group">
+        <label>اسم القطعة *</label>
+        <input type="text" id="part-name" placeholder="مثال: طقم مرايات / كنترولر 48V / بطارية" />
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>SKU / الكود</label>
+          <input type="text" id="part-sku" placeholder="مثال: BRK-220" />
+        </div>
+        <div class="form-group">
+          <label>التصنيف *</label>
+          <select id="part-category">
+            <option value="إكسسوارات ومرايات">إكسسوارات ومرايات</option>
+            <option value="فرامل وكابلات">فرامل وكابلات</option>
+            <option value="كنترولر وشاشات">كنترولر وشاشات</option>
+            <option value="بطاريات وشواحن">بطاريات وشواحن</option>
+            <option value="مواتير وإطارات">مواتير وإطارات</option>
+            <option value="إضاءة وإشارات">إضاءة وإشارات</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الكمية المتاحة *</label>
+          <input type="number" id="part-qty" value="1" min="0" />
+        </div>
+        <div class="form-group">
+          <label>حد إعادة الطلب</label>
+          <input type="number" id="part-min" value="2" min="0" />
+        </div>
+        <div class="form-group">
+          <label>التكلفة (ج.م)</label>
+          <input type="number" id="part-cost" value="0.00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>سعر البيع (ج.م)</label>
+          <input type="number" id="part-price" value="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>الرف / الموقع</label>
+        <input type="text" id="part-location" placeholder="مثال: رف B2" />
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+        <button class="btn btn-primary" style="flex: 2;" onclick="savePart()">+ حفظ القطعة</button>
+        <button class="btn btn-secondary" style="flex: 1;" onclick="closePartModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: تعديل أمر العمل -->
+  <div class="modal-backdrop" id="editOrderModal">
+    <div class="modal-box">
+      <div class="card-header">
+        <h2 id="editOrderTitle">تحديث أمر العمل</h2>
+        <button class="btn btn-secondary btn-sm" onclick="closeEditOrderModal()">✕</button>
+      </div>
+      <input type="hidden" id="edit-order-id" />
+
+      <div class="form-group">
+        <label>قطع أخدها العميل معه</label>
+        <input type="text" id="edit-taken-parts" />
+      </div>
+
+      <div class="form-group">
+        <label>قطع الغيار المطلوبة / التي يريدها العميل</label>
+        <textarea id="edit-requested-parts" style="min-height: 60px;"></textarea>
+      </div>
+
+      <div class="form-group" style="background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; border-radius: 10px;">
+        <label style="color: var(--teal);">إضافة قطعة غيار مركبة (تُخصم من المخزون فوراً)</label>
+        <div class="grid-3">
+          <select id="edit-part-select"></select>
+          <input type="number" id="edit-part-qty" value="1" min="1" />
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addPartToExistingOrder()">+ تركيب</button>
+        </div>
+        <div class="parts-tag-list" id="edit-installed-parts-list"></div>
+      </div>
+
+      <div class="form-group">
+        <label>تقرير الفحص الفني والأعمال المنفذة</label>
+        <textarea id="edit-tech-notes" style="min-height: 65px;"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>المصنعية / تكلفة إضافية (ج.م)</label>
+        <input type="number" id="edit-labor-cost" min="0" step="0.01" />
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+        <button class="btn btn-primary" style="flex: 2;" onclick="saveOrderEdits()">✔ حفظ التحديثات</button>
+        <button class="btn btn-secondary" onclick="closeEditOrderModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: معاينة وطباعة إيصال / تقرير فحص -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-box" style="max-width: 650px;">
+      <div class="card-header">
+        <h2>إيصال استلام وتقرير فحص فني</h2>
+        <button class="btn btn-secondary btn-sm" onclick="closeReceiptModal()">✕</button>
+      </div>
+      <div id="printArea" style="background: #fff; color: #111; padding: 20px; border-radius: 8px; line-height: 1.7;"></div>
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨 طباعة / حفظ PDF</button>
+        <button class="btn btn-secondary" onclick="closeReceiptModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">تم الحفظ بنجاح</div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <span>📊</span>
+      <span>نظرة عامة</span>
+    </button>
+    <button class="nav-btn" data-tab="reception" onclick="switchTab('reception')">
+      <span>🛴</span>
+      <span>الاستقبال</span>
+    </button>
+    <button class="nav-btn" data-tab="orders" onclick="switchTab('orders')">
+      <span>📋</span>
+      <span>الأوامر</span>
+    </button>
+    <button class="nav-btn" data-tab="parts" onclick="switchTab('parts')">
+      <span>📦</span>
+      <span>القطع</span>
+    </button>
+    <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+      <span>⚙️</span>
+      <span>الإعدادات</span>
+    </button>
+  </nav>
+
+  <script>
+    const FIREBASE_DB_URL = "https://iride-workshop-db-default-rtdb.firebaseio.com";
+    const STORAGE_KEY = 'iride_workshop_db_v1';
+
+    let db = {
+      orders: [],
+      parts: [],
+      users: [
+        { id: 'owner-1', name: 'المهندس محمد (المالك)', pin: '9999', role: 'owner', active: true }
+      ],
+      logs: [],
+      settings: {
+        branch: 'I Ride Bike Store – فرع أكتوبر (المحور المركزي، 6 أكتوبر)',
+        phone: ''
+      }
+    };
+
+    let currentUser = null;
+    let receptionParts = [];
+    let editingOrderTempParts = [];
+
+    function updateSyncBadge(text, isOnline = false) {
+      const el = document.getElementById('sync-status-badge');
+      el.textContent = text;
+      el.style.color = isOnline ? '#10b981' : '#8fa8b5';
+      el.style.borderColor = isOnline ? '#10b981' : '#183646';
+    }
+
+    function applyParsedData(parsed) {
+      if (!parsed) return;
+      db.orders = Array.isArray(parsed.orders) ? parsed.orders : [];
+      db.parts = Array.isArray(parsed.parts) ? parsed.parts : [];
+      db.users = (Array.isArray(parsed.users) && parsed.users.length) ? parsed.users : db.users;
+      db.logs = Array.isArray(parsed.logs) ? parsed.logs : [];
+      db.settings = { ...db.settings, ...(parsed.settings || {}) };
+      document.getElementById('set-branch').value = db.settings.branch;
+      document.getElementById('set-phone').value = db.settings.phone;
+      populateLoginUsers();
+      if (currentUser) refreshAllUI();
+    }
+
+    async function pullCloudNow(silent = false) {
+      if (!FIREBASE_DB_URL) {
+        updateSyncBadge('💾 محلي فقط');
+        if (!silent) showToast('أضف رابط FIREBASE_DB_URL لتفعيل المزامنة السحابية');
+        return;
+      }
+      try {
+        updateSyncBadge('🔄 جاري المزامنة...');
+        const res = await fetch(`${FIREBASE_DB_URL}/iride_system.json`);
+        if (!res.ok) throw new Error('Network error');
+        const cloudData = await res.json();
+        if (cloudData) {
+          applyParsedData(cloudData);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        } else {
+          await pushCloudNow(true);
+        }
+        updateSyncBadge('☁️ متزامن سحابياً', true);
+        if (!silent) showToast('✔ تم تحديث البيانات من السحابة');
+      } catch (e) {
+        updateSyncBadge('⚠️ وضع محلي');
+        if (!silent) showToast('تعذّر الاتصال بالسحابة، تم عرض النسخة المحلية', true);
+      }
+    }
+
+    async function pushCloudNow(silent = true) {
+      if (!FIREBASE_DB_URL) return;
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/iride_system.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(db)
+        });
+        if (!res.ok) throw new Error('Push failed');
+        updateSyncBadge('☁️ متزامن سحابياً', true);
+      } catch (e) {
+        updateSyncBadge('⚠️ تعذّر الرفع');
+        if (!silent) showToast('تعذّر حفظ التحديث على السحابة', true);
+      }
+    }
+
+    function loadDB() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          applyParsedData(JSON.parse(saved));
+        } else {
+          populateLoginUsers();
+        }
+      } catch (e) {
+        console.error('Error loading DB:', e);
+        populateLoginUsers();
+      }
+      pullCloudNow(true);
+    }
+
+    function saveDB() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        if (currentUser) refreshAllUI();
+        pushCloudNow(true);
+      } catch (e) {
+        showToast('حدث خطأ أثناء الحفظ المحلي!', true);
+      }
+    }
+
+    function addLog(actionText) {
+      if (!currentUser) return;
+      db.logs.unshift({
+        time: new Date().toLocaleString('ar-EG'),
+        user: currentUser.name,
+        action: actionText
+      });
+      if (db.logs.length > 100) db.logs.pop();
+    }
+
+    function isOwner() {
+      return currentUser && currentUser.role === 'owner';
+    }
+
+    // Login & Access Control
+    function populateLoginUsers() {
+      const sel = document.getElementById('login-user-select');
+      const activeUsers = db.users.filter(u => u.active !== false);
+      sel.innerHTML = activeUsers.map(u =>
+        `<option value="${u.id}">${u.name} (${u.role === 'owner' ? 'مالك' : 'موظف'})</option>`
+      ).join('');
+    }
+
+    function handleLogin() {
+      const userId = document.getElementById('login-user-select').value;
+      const pin = document.getElementById('login-pin').value.trim();
+      const user = db.users.find(u => u.id === userId && u.active !== false);
+
+      if (!user || user.pin !== pin) {
+        showToast('❌ كود الدخول غير صحيح!', true);
+        return;
+      }
+
+      currentUser = user;
+      document.getElementById('login-pin').value = '';
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.body.classList.toggle('is-owner', isOwner());
+      document.getElementById('active-user-badge').textContent =
+        `${isOwner() ? '👑' : '👤'} ${user.name}`;
+
+      addLog('تسجيل دخول إلى النظام');
+      saveDB();
+      showToast(`مرحباً بك، ${user.name}`);
+    }
+
+    function logoutUser() {
+      if (currentUser) {
+        addLog('قفل الشاشة وتسجيل خروج');
+        saveDB();
+      }
+      currentUser = null;
+      document.body.classList.remove('is-owner');
+      populateLoginUsers();
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+
+    function addUserAccount() {
+      if (!isOwner()) return;
+      const name = document.getElementById('new-staff-name').value.trim();
+      const pin = document.getElementById('new-staff-pin').value.trim();
+      const role = document.getElementById('new-staff-role').value;
+
+      if (!name || !pin || pin.length < 4) {
+        showToast('يرجى إدخال اسم الموظف وكود دخول من 4 أرقام/حروف على الأقل!', true);
+        return;
+      }
+
+      db.users.push({
+        id: 'usr-' + Date.now(),
+        name,
+        pin,
+        role,
+        active: true
+      });
+
+      document.getElementById('new-staff-name').value = '';
+      document.getElementById('new-staff-pin').value = '';
+      addLog(`إضافة حساب مستخدم جديد: ${name}`);
+      saveDB();
+      showToast(`✔ تم إنشاء حساب الدخول لـ ${name}`);
+    }
+
+    function changeUserPin(userId) {
+      if (!isOwner()) return;
+      const u = db.users.find(x => x.id === userId);
+      if (!u) return;
+      const newPin = prompt(`أدخل كود الدخول (PIN) الجديد لـ ${u.name}:`, u.pin);
+      if (newPin && newPin.trim().length >= 4) {
+        u.pin = newPin.trim();
+        addLog(`تغيير كود الدخول للمستخدم: ${u.name}`);
+        saveDB();
+        showToast('✔ تم تحديث كود الدخول');
+      }
+    }
+
+    function toggleUserActive(userId) {
+      if (!isOwner() || userId === currentUser.id) return;
+      const u = db.users.find(x => x.id === userId);
+      if (u) {
+        u.active = !u.active;
+        addLog(`${u.active ? 'تفعيل' : 'إيقاف'} حساب: ${u.name}`);
+        saveDB();
+      }
+    }
+
+    function deleteUserAccount(userId) {
+      if (!isOwner() || userId === currentUser.id) return;
+      if (confirm('حذف حساب هذا الموظف نهائياً؟')) {
+        const u = db.users.find(x => x.id === userId);
+        db.users = db.users.filter(x => x.id !== userId);
+        addLog(`حذف حساب الموظف: ${u ? u.name : userId}`);
+        saveDB();
+        showToast('تم حذف الحساب');
+      }
+    }
+
+    function renderUsersList() {
+      if (!isOwner()) return;
+      const box = document.getElementById('users-list');
+      box.innerHTML = db.users.map(u => `
+        <div class="item-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>${u.name}</strong>
+            <span class="badge ${u.role === 'owner' ? 'badge-done' : 'badge-progress'}" style="margin-right:6px;">
+              ${u.role === 'owner' ? 'مالك (كامل الصلاحيات)' : 'موظف (محدود)'}
+            </span>
+            ${u.active === false ? '<span class="badge badge-low">موقوف</span>' : ''}
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">كود الدخول (PIN): <strong>${u.pin}</strong></div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeUserPin('${u.id}')">تغيير الكود</button>
+            ${u.id !== currentUser.id ? `
+              <button class="btn btn-secondary btn-sm" onclick="toggleUserActive('${u.id}')">${u.active === false ? 'تفعيل' : 'إيقاف'}</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUserAccount('${u.id}')">حذف</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAuditLogs() {
+      if (!isOwner()) return;
+      const box = document.getElementById('audit-log-list');
+      if (!db.logs.length) {
+        box.innerHTML = '<p style="font-size:12px; color:var(--text-muted);">لا توجد حركات مسجلة بعد.</p>';
+        return;
+      }
+      box.innerHTML = db.logs.map(l => `
+        <div style="font-size:12px; padding:6px 8px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; gap:8px;">
+          <span><strong style="color:var(--teal);">${l.user}:</strong> ${l.action}</span>
+          <span style="color:var(--text-muted); white-space:nowrap;">${l.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearAuditLogs() {
+      if (!isOwner()) return;
+      if (confirm('مسح سجل المراقبة بالكامل؟')) {
+        db.logs = [];
+        saveDB();
+      }
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.backgroundColor = isError ? '#ef4444' : '#14b8a6';
+      toast.style.color = isError ? '#fff' : '#041311';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // Navigation
+    function switchTab(tabName) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('sec-' + tabName).classList.add('active');
+      document.querySelector(`.nav-btn[data-tab="${tabName}"]`).classList.add('active');
+      refreshAllUI();
+    }
+
+    // Chips Toggle
+    document.querySelectorAll('#accessories-chips .chip').forEach(chip => {
+      chip.addEventListener('click', () => chip.classList.toggle('selected'));
+    });
+
+    document.getElementById('rec-date').valueAsDate = new Date();
+    document.getElementById('rec-labor-cost').addEventListener('input', updateReceptionTotalPreview);
+
+    function populatePartsSelect(selectId) {
+      const sel = document.getElementById(selectId);
+      if (!db.parts.length) {
+        sel.innerHTML = '<option value="">لا توجد قطع في المخزون</option>';
+        return;
+      }
+      sel.innerHTML = db.parts.map(p =>
+        `<option value="${p.id}">${p.name} (${p.sku}) - متوفر: ${p.qty} - ${p.price} ج.م</option>`
+      ).join('');
+    }
+
+    function addPartToReception() {
+      const partId = document.getElementById('rec-part-select').value;
+      const qty = parseInt(document.getElementById('rec-part-qty').value) || 1;
+      if (!partId) {
+        showToast('أضف قطعة للمخزون أولاً!', true);
+        return;
+      }
+      const part = db.parts.find(p => p.id === partId);
+      if (!part || part.qty < qty) {
+        showToast('الكمية المطلوبة غير متوفرة في المخزون!', true);
+        return;
+      }
+
+      const existing = receptionParts.find(x => x.partId === partId);
+      if (existing) {
+        if (part.qty < existing.qty + qty) {
+          showToast('تجاوزت الكمية المتاحة في المخزون!', true);
+          return;
+        }
+        existing.qty += qty;
+      } else {
+        receptionParts.push({
+          partId: part.id,
+          name: part.name,
+          sku: part.sku,
+          qty,
+          price: parseFloat(part.price) || 0
+        });
+      }
+
+      renderReceptionSelectedParts();
+      updateReceptionTotalPreview();
+    }
+
+    function removePartFromReception(partId) {
+      receptionParts = receptionParts.filter(x => x.partId !== partId);
+      renderReceptionSelectedParts();
+      updateReceptionTotalPreview();
+    }
+
+    function renderReceptionSelectedParts() {
+      const box = document.getElementById('rec-selected-parts-list');
+      if (!receptionParts.length) {
+        box.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">لم يتم اختيار قطع مركبة بعد.</span>';
+        return;
+      }
+      box.innerHTML = receptionParts.map(p => `
+        <div class="part-pill">
+          <span>${p.name} × ${p.qty} (${(p.qty * p.price).toFixed(2)} ج.م)</span>
+          <button type="button" onclick="removePartFromReception('${p.partId}')">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function updateReceptionTotalPreview() {
+      const partsSum = receptionParts.reduce((acc, p) => acc + (p.qty * p.price), 0);
+      const labor = parseFloat(document.getElementById('rec-labor-cost').value) || 0;
+      document.getElementById('rec-total-preview').textContent = `${(partsSum + labor).toFixed(2)} ج.م`;
+    }
+
+    function calcOrderTotal(order) {
+      const partsSum = (order.installedParts || []).reduce((acc, p) => acc + ((p.qty || 1) * (p.price || 0)), 0);
+      const labor = parseFloat(order.laborCost !== undefined ? order.laborCost : (order.cost || 0)) || 0;
+      return partsSum + labor;
+    }
+
+    // Create Work Order
+    function createWorkOrder() {
+      const customer = document.getElementById('rec-customer').value.trim();
+      const phone = document.getElementById('rec-phone').value.trim();
+      const model = document.getElementById('rec-model').value.trim();
+      const serial = document.getElementById('rec-serial').value.trim();
+      const tech = document.getElementById('rec-tech').value.trim() || 'eng. mohamed';
+      const complaint = document.getElementById('rec-complaint').value.trim();
+      const takenParts = document.getElementById('rec-taken-parts').value.trim();
+      const requestedParts = document.getElementById('rec-requested-parts').value.trim();
+      const dueDate = document.getElementById('rec-date').value;
+      const laborCost = parseFloat(document.getElementById('rec-labor-cost').value) || 0;
+
+      if (!customer || !phone || !model || !complaint) {
+        showToast('يرجى إدخال اسم العميل، الهاتف، الموديل، والشكوى!', true);
+        return;
+      }
+
+      for (const item of receptionParts) {
+        const invPart = db.parts.find(p => p.id === item.partId);
+        if (!invPart || invPart.qty < item.qty) {
+          showToast(`الكمية غير كافية للقطعة: ${item.name}`, true);
+          return;
+        }
+      }
+      for (const item of receptionParts) {
+        const invPart = db.parts.find(p => p.id === item.partId);
+        invPart.qty -= item.qty;
+      }
+
+      const accessories = Array.from(document.querySelectorAll('#accessories-chips .chip.selected'))
+        .map(c => c.dataset.val);
+
+      const orderNumber = 'IR-' + String(db.orders.length + 1001);
+      const partsSum = receptionParts.reduce((acc, p) => acc + (p.qty * p.price), 0);
+
+      const newOrder = {
+        id: Date.now().toString(),
+        orderNumber,
+        customer,
+        phone,
+        model,
+        serial,
+        tech,
+        createdBy: currentUser ? currentUser.name : '',
+        complaint,
+        accessories,
+        takenParts,
+        requestedParts,
+        installedParts: [...receptionParts],
+        dueDate,
+        laborCost,
+        cost: partsSum + laborCost,
+        status: 'open',
+        techNotes: '',
+        createdAt: new Date().toLocaleString('ar-EG')
+      };
+
+      db.orders.unshift(newOrder);
+      addLog(`إنشاء أمر عمل ${orderNumber} للعميل ${customer}`);
+      saveDB();
+      resetReceptionForm();
+      showToast(`✔ تم إنشاء وحفظ أمر العمل رقم ${orderNumber}`);
+      switchTab('orders');
+    }
+
+    function resetReceptionForm() {
+      document.getElementById('rec-customer').value = '';
+      document.getElementById('rec-phone').value = '';
+      document.getElementById('rec-model').value = '';
+      document.getElementById('rec-serial').value = '';
+      document.getElementById('rec-complaint').value = '';
+      document.getElementById('rec-taken-parts').value = '';
+      document.getElementById('rec-requested-parts').value = '';
+      document.getElementById('rec-labor-cost').value = '';
+      document.getElementById('rec-date').valueAsDate = new Date();
+      document.querySelectorAll('#accessories-chips .chip').forEach(c => c.classList.remove('selected'));
+      receptionParts = [];
+      renderReceptionSelectedParts();
+      updateReceptionTotalPreview();
+    }
+
+    // Update Order Status
+    function updateOrderStatus(id, newStatus) {
+      const order = db.orders.find(o => o.id === id);
+      if (order) {
+        order.status = newStatus;
+        addLog(`تغيير حالة ${order.orderNumber} إلى (${newStatus})`);
+        saveDB();
+        showToast('تم تحديث حالة أمر العمل');
+      }
+    }
+
+    // Edit Order Modal
+    function openEditOrderModal(id) {
+      const order = db.orders.find(o => o.id === id);
+      if (!order) return;
+      document.getElementById('editOrderModal').classList.add('open');
+      document.getElementById('editOrderTitle').textContent = `تحديث أمر العمل ${order.orderNumber}`;
+      document.getElementById('edit-order-id').value = order.id;
+      document.getElementById('edit-taken-parts').value = order.takenParts || '';
+      document.getElementById('edit-requested-parts').value = order.requestedParts || '';
+      document.getElementById('edit-tech-notes').value = order.techNotes || '';
+      document.getElementById('edit-labor-cost').value = order.laborCost !== undefined ? order.laborCost : (order.cost || 0);
+      editingOrderTempParts = JSON.parse(JSON.stringify(order.installedParts || []));
+      populatePartsSelect('edit-part-select');
+      renderEditInstalledParts();
+    }
+
+    function closeEditOrderModal() {
+      document.getElementById('editOrderModal').classList.remove('open');
+      editingOrderTempParts = [];
+    }
+
+    function addPartToExistingOrder() {
+      const partId = document.getElementById('edit-part-select').value;
+      const qty = parseInt(document.getElementById('edit-part-qty').value) || 1;
+      if (!partId) return;
+      const invPart = db.parts.find(p => p.id === partId);
+      if (!invPart || invPart.qty < qty) {
+        showToast('الكمية المطلوبة غير متوفرة في المخزون!', true);
+        return;
+      }
+
+      invPart.qty -= qty;
+      const existing = editingOrderTempParts.find(x => x.partId === partId);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        editingOrderTempParts.push({
+          partId: invPart.id,
+          name: invPart.name,
+          sku: invPart.sku,
+          qty,
+          price: parseFloat(invPart.price) || 0
+        });
+      }
+      addLog(`إضافة قطعة (${invPart.name} ×${qty}) لأمر عمل`);
+      saveDB();
+      populatePartsSelect('edit-part-select');
+      renderEditInstalledParts();
+      showToast('تمت إضافة القطعة وخصمها من المخزون');
+    }
+
+    function removePartFromExistingOrder(partId) {
+      if (!isOwner()) {
+        showToast('فقط المالك يمكنه إزالة قطع مركبة مسبقاً!', true);
+        return;
+      }
+      const idx = editingOrderTempParts.findIndex(x => x.partId === partId);
+      if (idx === -1) return;
+      const removed = editingOrderTempParts[idx];
+      const invPart = db.parts.find(p => p.id === removed.partId);
+      if (invPart) {
+        invPart.qty += removed.qty;
+      }
+      editingOrderTempParts.splice(idx, 1);
+      saveDB();
+      populatePartsSelect('edit-part-select');
+      renderEditInstalledParts();
+      showToast('تمت إزالة القطعة وإعادتها للمخزون');
+    }
+
+    function renderEditInstalledParts() {
+      const box = document.getElementById('edit-installed-parts-list');
+      if (!editingOrderTempParts.length) {
+        box.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">لا توجد قطع مركبة مسجلة.</span>';
+        return;
+      }
+      box.innerHTML = editingOrderTempParts.map(p => `
+        <div class="part-pill">
+          <span>${p.name} × ${p.qty} (${(p.qty * p.price).toFixed(2)} ج.م)</span>
+          ${isOwner() ? `<button type="button" onclick="removePartFromExistingOrder('${p.partId}')">✕</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function saveOrderEdits() {
+      const id = document.getElementById('edit-order-id').value;
+      const order = db.orders.find(o => o.id === id);
+      if (!order) return;
+      order.takenParts = document.getElementById('edit-taken-parts').value.trim();
+      order.requestedParts = document.getElementById('edit-requested-parts').value.trim();
+      order.techNotes = document.getElementById('edit-tech-notes').value.trim();
+      order.laborCost = parseFloat(document.getElementById('edit-labor-cost').value) || 0;
+      order.installedParts = [...editingOrderTempParts];
+      order.cost = calcOrderTotal(order);
+      addLog(`تحديث بيانات وتقرير ${order.orderNumber}`);
+      saveDB();
+      closeEditOrderModal();
+      showToast('✔ تم حفظ تحديثات أمر العمل');
+    }
+
+    function deleteOrder(id) {
+      if (!isOwner()) {
+        showToast('غير مسموح للموظفين بحذف أوامر العمل!', true);
+        return;
+      }
+      if (confirm('هل أنت متأكد من حذف أمر العمل نهائياً؟')) {
+        const order = db.orders.find(o => o.id === id);
+        db.orders = db.orders.filter(o => o.id !== id);
+        addLog(`حذف أمر عمل ${order ? order.orderNumber : ''}`);
+        saveDB();
+        showToast('تم حذف أمر العمل');
+      }
+    }
+
+    // Render Orders
+    function getStatusBadge(status) {
+      if (status === 'open') return '<span class="badge badge-open">مفتوح / فحص</span>';
+      if (status === 'progress') return '<span class="badge badge-progress">جاري الإصلاح</span>';
+      return '<span class="badge badge-done">تم التسليم / جاهز</span>';
+    }
+
+    function renderOrderCard(o) {
+      const installedText = (o.installedParts && o.installedParts.length)
+        ? o.installedParts.map(p => `${p.name} (×${p.qty})`).join('، ')
+        : 'لا يوجد';
+      const total = calcOrderTotal(o);
+
+      return `
+        <div class="item-card">
+          <div class="item-top">
+            <div>
+              <strong style="color: var(--teal); font-size: 15px;">${o.orderNumber}</strong> -
+              <strong>${o.customer}</strong> (${o.phone})
+              <div style="font-size: 13px; color: #fff; margin-top: 2px;">🛴 ${o.model} ${o.serial ? `| S/N: ${o.serial}` : ''}</div>
+            </div>
+            ${getStatusBadge(o.status)}
+          </div>
+          <div class="item-meta">
+            <div><strong>الشكوى:</strong> ${o.complaint}</div>
+            <div><strong>الملحقات المستلمة:</strong> ${o.accessories.length ? o.accessories.join('، ') : 'لا يوجد'}</div>
+            ${o.takenParts ? `<div><strong>قطع أخدها العميل:</strong> ${o.takenParts}</div>` : ''}
+            ${o.requestedParts ? `<div style="color: var(--warning);"><strong>قطع يريدها العميل:</strong> ${o.requestedParts}</div>` : ''}
+            <div style="color: var(--teal);"><strong>قطع غيار هتتركب / مركبة:</strong> ${installedText}</div>
+            ${o.techNotes ? `<div><strong>تقرير الفحص:</strong> ${o.techNotes}</div>` : ''}
+            <div><strong>المهندس:</strong> ${o.tech} ${o.createdBy ? `| <strong>المُدخِل:</strong> ${o.createdBy}` : ''} | <strong>التسليم:</strong> ${o.dueDate || '-'} | <strong>الإجمالي:</strong> ${total.toFixed(2)} ج.م</div>
+          </div>
+          <div class="item-actions">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" style="width: auto; padding: 5px 8px; font-size: 12px;">
+              <option value="open" ${o.status === 'open' ? 'selected' : ''}>مفتوح / فحص</option>
+              <option value="progress" ${o.status === 'progress' ? 'selected' : ''}>جاري الإصلاح</option>
+              <option value="done" ${o.status === 'done' ? 'selected' : ''}>تم التسليم / جاهز</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="openEditOrderModal('${o.id}')">🛠 القطع والفحص</button>
+            <button class="btn btn-primary btn-sm" onclick="openReceipt('${o.id}')">🖨 إيصال / PDF</button>
+            ${isOwner() ? `<button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">حذف</button>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderOrders() {
+      const q = (document.getElementById('search-orders').value || '').toLowerCase();
+      const statusFilter = document.getElementById('filter-order-status').value;
+
+      const filtered = db.orders.filter(o => {
+        const matchStatus = statusFilter === 'all' || o.status === statusFilter;
+        const matchQuery =
+          o.orderNumber.toLowerCase().includes(q) ||
+          o.customer.toLowerCase().includes(q) ||
+          o.phone.includes(q) ||
+          o.model.toLowerCase().includes(q);
+        return matchStatus && matchQuery;
+      });
+
+      document.getElementById('orders-count-badge').textContent = `${filtered.length} أمر`;
+      const container = document.getElementById('orders-list');
+      container.innerHTML = filtered.length
+        ? filtered.map(renderOrderCard).join('')
+        : '<p style="text-align:center; color: var(--text-muted); padding: 20px;">لا توجد أوامر عمل مطابقة حالياً.</p>';
+    }
+
+    // Parts Modal & CRUD
+    function openPartModal(partId = null) {
+      if (!isOwner()) {
+        showToast('فقط المالك يمكنه إضافة أو تعديل أسعار المخزون!', true);
+        return;
+      }
+      document.getElementById('partModal').classList.add('open');
+      if (partId) {
+        const p = db.parts.find(x => x.id === partId);
+        document.getElementById('partModalTitle').textContent = 'تعديل بيانات قطعة';
+        document.getElementById('part-id').value = p.id;
+        document.getElementById('part-name').value = p.name;
+        document.getElementById('part-sku').value = p.sku;
+        document.getElementById('part-category').value = p.category;
+        document.getElementById('part-qty').value = p.qty;
+        document.getElementById('part-min').value = p.minQty;
+        document.getElementById('part-cost').value = p.cost;
+        document.getElementById('part-price').value = p.price;
+        document.getElementById('part-location').value = p.location;
+      } else {
+        document.getElementById('partModalTitle').textContent = 'إضافة قطعة للمخزون';
+        document.getElementById('part-id').value = '';
+        document.getElementById('part-name').value = '';
+        document.getElementById('part-sku').value = 'PRT-' + (db.parts.length + 101);
+        document.getElementById('part-qty').value = 1;
+        document.getElementById('part-min').value = 2;
+        document.getElementById('part-cost').value = '0.00';
+        document.getElementById('part-price').value = '0.00';
+        document.getElementById('part-location').value = '';
+      }
+    }
+
+    function closePartModal() {
+      document.getElementById('partModal').classList.remove('open');
+    }
+
+    function savePart() {
+      if (!isOwner()) return;
+      const id = document.getElementById('part-id').value;
+      const name = document.getElementById('part-name').value.trim();
+      const sku = document.getElementById('part-sku').value.trim();
+      const category = document.getElementById('part-category').value;
+      const qty = parseInt(document.getElementById('part-qty').value) || 0;
+      const minQty = parseInt(document.getElementById('part-min').value) || 0;
+      const cost = parseFloat(document.getElementById('part-cost').value) || 0;
+      const price = parseFloat(document.getElementById('part-price').value) || 0;
+      const location = document.getElementById('part-location').value.trim();
+
+      if (!name) {
+        showToast('يرجى إدخال اسم القطعة!', true);
+        return;
+      }
+
+      if (id) {
+        const idx = db.parts.findIndex(p => p.id === id);
+        if (idx > -1) {
+          db.parts[idx] = { id, name, sku, category, qty, minQty, cost, price, location };
+          addLog(`تعديل قطعة في المخزون: ${name}`);
+        }
+      } else {
+        db.parts.unshift({
+          id: Date.now().toString(),
+          name, sku, category, qty, minQty, cost, price, location
+        });
+        addLog(`إضافة قطعة جديدة للمخزون: ${name}`);
+      }
+
+      saveDB();
+      closePartModal();
+      showToast('✔ تم حفظ القطعة في المخزون');
+    }
+
+    function adjustPartQty(id, delta) {
+      if (!isOwner()) {
+        showToast('تعديل الكميات متاح للمالك فقط!', true);
+        return;
+      }
+      const p = db.parts.find(x => x.id === id);
+      if (p) {
+        p.qty = Math.max(0, p.qty + delta);
+        addLog(`تعديل كمية (${p.name}) بمقدار ${delta > 0 ? '+1' : '-1'}`);
+        saveDB();
+      }
+    }
+
+    function deletePart(id) {
+      if (!isOwner()) return;
+      if (confirm('حذف هذه القطعة من المخزون؟')) {
+        const p = db.parts.find(x => x.id === id);
+        db.parts = db.parts.filter(x => x.id !== id);
+        addLog(`حذف قطعة من المخزون: ${p ? p.name : ''}`);
+        saveDB();
+        showToast('تم حذف القطعة');
+      }
+    }
+
+    function renderParts() {
+      const q = (document.getElementById('search-parts').value || '').toLowerCase();
+      const filtered = db.parts.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.location.toLowerCase().includes(q)
+      );
+
+      const container = document.getElementById('parts-list');
+      if (!filtered.length) {
+        container.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">المخزون فارغ حالياً.</p>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const isLow = p.qty <= p.minQty;
+        return `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <strong>${p.name}</strong>
+                <span style="font-size: 12px; color: var(--teal); margin-right: 6px;">[${p.sku}]</span>
+                <div style="font-size: 12px; color: var(--text-muted);">${p.category} ${p.location ? `| الرف: ${p.location}` : ''}</div>
+              </div>
+              <div>
+                ${isLow ? '<span class="badge badge-low">نواقص</span>' : '<span class="badge badge-done">متوفر</span>'}
+              </div>
+            </div>
+            <div class="item-meta">
+              الكمية المتاحة: <strong style="color: #fff; font-size: 14px;">${p.qty}</strong> (حد الطلب: ${p.minQty}) |
+              ${isOwner() ? `التكلفة: ${p.cost} ج.م | ` : ''}
+              سعر البيع: <strong style="color: var(--teal);">${p.price} ج.م</strong>
+            </div>
+            ${isOwner() ? `
+            <div class="item-actions">
+              <button class="btn btn-secondary btn-sm" onclick="adjustPartQty('${p.id}', 1)">+1</button>
+              <button class="btn btn-secondary btn-sm" onclick="adjustPartQty('${p.id}', -1)">-1</button>
+              <button class="btn btn-secondary btn-sm" onclick="openPartModal('${p.id}')">تعديل</button>
+              <button class="btn btn-danger btn-sm" onclick="deletePart('${p.id}')">حذف</button>
+            </div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Printable Receipt & Diagnostic Report
+    function openReceipt(orderId) {
+      const o = db.orders.find(x => x.id === orderId);
+      if (!o) return;
+
+      const installedRows = (o.installedParts && o.installedParts.length)
+        ? o.installedParts.map(p => `<li>${p.name} — عدد: ${p.qty} — ${(p.qty * p.price).toFixed(2)} ج.م</li>`).join('')
+        : '<li>لا توجد قطع مركبة مسجلة</li>';
+
+      const total = calcOrderTotal(o);
+
+      const html = `
+        <div style="border-bottom: 2px solid #0d202b; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h2 style="margin:0; font-size: 18px; color: #0d202b;">I Ride Bike Store</h2>
+            <div style="font-size: 12px; color: #444;">Smart Electric Scooter Maintenance & Workshop Management</div>
+            <div style="font-size: 11px; color: #666;">${db.settings.branch} ${db.settings.phone ? '| ت: ' + db.settings.phone : ''}</div>
+          </div>
+          <div style="text-align: left;">
+            <strong style="font-size: 16px; color: #0d9488;">${o.orderNumber}</strong>
+            <div style="font-size: 11px; color: #555;">${o.createdAt}</div>
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px;">
+          <tr>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>اسم العميل:</strong> ${o.customer}</td>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>الهاتف:</strong> ${o.phone}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>موديل السكوتر:</strong> ${o.model}</td>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>S/N:</strong> ${o.serial || '-'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>المهندس:</strong> ${o.tech}</td>
+            <td style="padding: 6px; border: 1px solid #ddd;"><strong>موعد التسليم المتوقع:</strong> ${o.dueDate || '-'}</td>
+          </tr>
+        </table>
+
+        <div style="margin-bottom: 10px; padding: 10px; background: #f8fafc; border: 1px solid #ddd; border-radius: 6px;">
+          <strong>الشكوى المبلّغ عنها عند الاستلام:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${o.complaint}</p>
+        </div>
+
+        <div style="margin-bottom: 10px; padding: 10px; background: #f8fafc; border: 1px solid #ddd; border-radius: 6px;">
+          <strong>الملحقات المستلمة مع السكوتر:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${o.accessories.length ? o.accessories.join(' - ') : 'لا توجد ملحقات'}</p>
+        </div>
+
+        ${o.takenParts ? `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f8fafc; border: 1px solid #ddd; border-radius: 6px;">
+          <strong>قطع أخدها العميل معه:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${o.takenParts}</p>
+        </div>` : ''}
+
+        ${o.requestedParts ? `
+        <div style="margin-bottom: 10px; padding: 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
+          <strong>قطع غيار يريدها / يطلبها العميل:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${o.requestedParts}</p>
+        </div>` : ''}
+
+        <div style="margin-bottom: 10px; padding: 10px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 6px;">
+          <strong>قطع الغيار التي ستُركّب / المركبة:</strong>
+          <ul style="margin: 4px 18px 0 0; font-size: 13px;">${installedRows}</ul>
+        </div>
+
+        ${o.techNotes ? `
+        <div style="margin-bottom: 10px; padding: 10px; background: #f8fafc; border: 1px solid #ddd; border-radius: 6px;">
+          <strong>تقرير الفحص الفني والأعمال المنفذة:</strong>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${o.techNotes}</p>
+        </div>` : ''}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #0d202b; padding-top: 10px; margin-top: 14px;">
+          <div><strong>التكلفة الإجمالية:</strong> <span style="font-size: 16px; font-weight: bold;">${total.toFixed(2)} ج.م</span></div>
+          <div style="font-size: 12px;">توقيع المستلم: ..........................</div>
+        </div>
+      `;
+
+      document.getElementById('printArea').innerHTML = html;
+      document.getElementById('receiptModal').classList.add('open');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.remove('open');
+    }
+
+    // Settings & JSON Backup
+    function saveSettings() {
+      if (!isOwner()) return;
+      db.settings.branch = document.getElementById('set-branch').value.trim();
+      db.settings.phone = document.getElementById('set-phone').value.trim();
+      addLog('تحديث إعدادات الفرع');
+      saveDB();
+      showToast('✔ تم حفظ إعدادات الفرع');
+    }
+
+    function exportBackup() {
+      if (!isOwner()) return;
+      const dataStr = JSON.stringify(db, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateTag = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `IRide-Workshop-Backup-${dateTag}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addLog('تصدير نسخة احتياطية JSON');
+      saveDB();
+      showToast('⬇ تم تحميل ملف النسخة الاحتياطية');
+    }
+
+    function importBackup(event) {
+      if (!isOwner()) return;
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && Array.isArray(imported.orders) && Array.isArray(imported.parts)) {
+            db.orders = imported.orders;
+            db.parts = imported.parts;
+            if (imported.users && imported.users.length) db.users = imported.users;
+            if (imported.settings) db.settings = imported.settings;
+            addLog('استيراد نسخة احتياطية JSON');
+            saveDB();
+            showToast('✔ تم استعادة البيانات من النسخة الاحتياطية بنجاح');
+          } else {
+            showToast('ملف النسخة الاحتياطية غير صالح!', true);
+          }
+        } catch (err) {
+          showToast('تعذّر قراءة الملف!', true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Refresh Dashboard & Lists
+    function refreshAllUI() {
+      document.getElementById('stat-total-orders').textContent = db.orders.length;
+      document.getElementById('stat-open-orders').textContent = db.orders.filter(o => o.status !== 'done').length;
+      document.getElementById('stat-done-orders').textContent = db.orders.filter(o => o.status === 'done').length;
+      document.getElementById('stat-parts-count').textContent = db.parts.length;
+
+      if (isOwner()) {
+        const totalRev = db.orders.reduce((sum, o) => sum + calcOrderTotal(o), 0);
+        document.getElementById('stat-total-revenue').textContent = totalRev.toFixed(0);
+      }
+
+      const recentContainer = document.getElementById('dashboard-recent-orders');
+      const recent = db.orders.slice(0, 3);
+      recentContainer.innerHTML = recent.length
+        ? recent.map(renderOrderCard).join('')
+        : '<p style="text-align:center; color: var(--text-muted); padding: 16px;">لا توجد أوامر عمل مسجلة بعد. ابدأ من تبويب "الاستقبال".</p>';
+
+      populatePartsSelect('rec-part-select');
+      renderReceptionSelectedParts();
+      renderOrders();
+      renderParts();
+      renderUsersList();
+      renderAuditLogs();
+    }
+
+    // Init
+    loadDB();
+  </script>
+</body>
+</html>
